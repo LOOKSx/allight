@@ -4,53 +4,52 @@ const { execSync } = require('child_process');
 
 const rootDir = __dirname;
 const distDir = path.join(rootDir, 'dist');
-const indexHtml = path.join(distDir, 'index.html');
 
-console.log('=== All Light Build Process ===');
+console.log('=== All Light Universal Vercel & Go Build ===');
 
-// Check if pre-built Angular dist is already present
-if (fs.existsSync(indexHtml)) {
-  console.log('Found verified pre-built Angular app in dist/');
-  console.log('Static files ready for Vercel deployment.');
-} else {
-  // Try to build Angular if node_modules exists
-  const frontendDir = path.join(rootDir, 'frontend');
-  const angularDistDir = path.join(frontendDir, 'dist', 'frontend', 'browser');
-  if (fs.existsSync(frontendDir)) {
-    try {
-      console.log('Building Angular frontend...');
-      execSync('npm run build', { cwd: frontendDir, stdio: 'inherit' });
-      if (fs.existsSync(angularDistDir)) {
-        if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
-        for (const file of fs.readdirSync(angularDistDir)) {
-          fs.cpSync(path.join(angularDistDir, file), path.join(distDir, file), { recursive: true, force: true });
-        }
-      }
-    } catch (e) {
-      console.warn('Angular build skipped:', e.message);
-    }
+// Directories where any preset (Other, Angular, Vite, Next, etc.) might look
+const targetDirs = [
+  rootDir,
+  distDir,
+  path.join(distDir, 'browser'),
+  path.join(distDir, 'allight-app'),
+  path.join(distDir, 'allight-app', 'browser'),
+  path.join(distDir, 'frontend'),
+  path.join(distDir, 'frontend', 'browser'),
+  path.join(rootDir, 'public')
+];
+
+// Files to sync across all potential output folders
+const staticFiles = [
+  'index.html',
+  'main-TVCXTZC7.js',
+  'styles-VJF5A3FQ.css',
+  'favicon.svg',
+  'icons.svg',
+  'favicon.ico'
+];
+
+for (const dir of targetDirs) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
-}
-
-// Mirror dist files to root so Vercel can serve from either root or dist
-if (fs.existsSync(distDir)) {
-  for (const file of fs.readdirSync(distDir)) {
-    const src = path.join(distDir, file);
-    const dest = path.join(rootDir, file);
-    const stat = fs.statSync(src);
-    if (!stat.isDirectory()) {
+  for (const file of staticFiles) {
+    const src = path.join(rootDir, file);
+    const dest = path.join(dir, file);
+    if (fs.existsSync(src) && src !== dest) {
       fs.copyFileSync(src, dest);
     }
   }
 }
+console.log('Synchronized static Angular app across all target directories.');
 
-// Check Go (optional, only if Go exists in local dev environment)
+// Optional Go build if running in local environment
 try {
   execSync('go version', { stdio: 'ignore' });
-  console.log('Go detected. Compiling allight-server.exe for local run...');
   execSync('go build -o allight-server.exe ./backend/main.go', { cwd: rootDir, stdio: 'inherit' });
+  console.log('Golang binary compiled for local execution.');
 } catch (e) {
-  console.log('Note: Go not installed in this environment (e.g. Vercel static build). Skipping Go binary build.');
+  // Go not available on Vercel Node container - safe to ignore
 }
 
 console.log('=== Build Completed Successfully! ===');

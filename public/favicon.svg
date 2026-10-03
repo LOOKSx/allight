@@ -1,0 +1,54 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Royal Champagne Gold Linear Gradient -->
+    <linearGradient id="gold-metal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fffdf0"/>
+      <stop offset="25%" stop-color="#fef08a"/>
+      <stop offset="60%" stop-color="#d4af37"/>
+      <stop offset="90%" stop-color="#b45309"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+
+    <!-- Radial Glow for Core -->
+    <radialGradient id="gold-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fffdf0" stop-opacity="1"/>
+      <stop offset="30%" stop-color="#fef08a" stop-opacity="0.8"/>
+      <stop offset="70%" stop-color="#d4af37" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#d4af37" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="bloom" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Obsidian Background Squircle -->
+  <rect width="512" height="512" rx="128" fill="#07080a" stroke="#222834" stroke-width="8"/>
+
+  <!-- Glowing Core Halo -->
+  <circle cx="256" cy="256" r="160" fill="url(#gold-glow)" opacity="0.6"/>
+
+  <!-- Geometric allight Monogram 'a' & Concentric Optical Light Arcs -->
+  <g filter="url(#bloom)">
+    <!-- Outer Concentric Aperture Ring -->
+    <circle cx="256" cy="256" r="140" fill="none" stroke="url(#gold-metal)" stroke-width="16" stroke-linecap="round" opacity="0.4"/>
+    
+    <!-- Dynamic Spiral Luminaire Arcs -->
+    <path d="M 256 116 A 140 140 0 0 1 396 256 A 100 100 0 0 1 296 356 C 210 356 176 300 176 240 C 176 170 230 140 290 140 C 330 140 360 160 376 190" 
+          fill="none" stroke="url(#gold-metal)" stroke-width="26" stroke-linecap="round"/>
+
+    <!-- Lower Loop of 'a' -->
+    <circle cx="256" cy="270" r="64" fill="none" stroke="url(#gold-metal)" stroke-width="24"/>
+
+    <!-- Vertical Stem -->
+    <path d="M 320 206 L 320 334 C 320 348 332 356 346 356" 
+          fill="none" stroke="url(#gold-metal)" stroke-width="24" stroke-linecap="round"/>
+
+    <!-- Apex Core Light Point -->
+    <circle cx="256" cy="270" r="14" fill="#fffdf0"/>
+  </g>
+</svg>
