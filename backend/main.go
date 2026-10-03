@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -52,7 +54,18 @@ type App struct {
 	subMu      sync.Mutex
 }
 
+func getLocalIP() string {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		return "127.0.0.1"
+	}
+	defer conn.Close()
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	return localAddr.IP.String()
+}
+
 func NewApp() *App {
+	localIP := getLocalIP()
 	return &App{
 		state: LampState{
 			Power:      true,
@@ -75,7 +88,7 @@ func NewApp() *App {
 				Status:    "online",
 				Type:      "wifi",
 				SSID:      "AllLight-Home-2.4G",
-				IPAddress: "192.168.1.188",
+				IPAddress: localIP,
 			},
 			LastUpdate: time.Now(),
 		},
@@ -399,11 +412,21 @@ func main() {
 	handler := enableCORS(mux)
 
 	addr := ":" + port
+	localIP := getLocalIP()
+
 	fmt.Println("==================================================")
-	fmt.Printf("  All Light - Golang Backend Server Running!\n")
-	fmt.Printf("  Listening on http://localhost%s\n", addr)
-	fmt.Printf("  API status: http://localhost%s/api/status\n", addr)
+	fmt.Printf("  💡 All Light - Golang & Angular Web App Running!\n")
+	fmt.Printf("  💻 เครื่องนี้ (Local):   http://localhost%s\n", addr)
+	fmt.Printf("  📱 มือถือในบ้าน (LAN):   http://%s%s\n", localIP, addr)
+	fmt.Printf("  ⚡ API Status:          http://localhost%s/api/status\n", addr)
 	fmt.Println("==================================================")
+	fmt.Println("  (เปิดใช้งานได้ทุกอุปกรณ์ในบ้าน ไม่จำกัด)")
+	fmt.Println("  กด Ctrl + C เพื่อปิดเซิร์ฟเวอร์")
+
+	go func() {
+		time.Sleep(600 * time.Millisecond)
+		_ = exec.Command("cmd", "/c", "start", fmt.Sprintf("http://localhost:%s", port)).Start()
+	}()
 
 	if err := http.ListenAndServe(addr, handler); err != nil {
 		log.Fatalf("Server failed: %v", err)
