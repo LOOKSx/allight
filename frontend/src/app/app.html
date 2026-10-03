@@ -1,0 +1,408 @@
+<div class="app-container">
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 18h6m-4 4h2m-6-13a5 5 0 1 1 8 0c0 1.9-1.2 3.5-2 4.5V16H9v-2.5C8.2 12.5 7 10.9 7 9z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>All Light</h1>
+        <p>ระบบควบคุมโคมไฟอัจฉริยะ</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Network badge -->
+      <div class="status-badge" [class.online]="state().network.status === 'online'">
+        <span class="status-dot"></span>
+        <span class="status-label">
+          {{ state().network.status === 'online' ? 'ออนไลน์ (' + state().network.ssid + ')' : 'ออฟไลน์' }}
+        </span>
+      </div>
+
+      <!-- Sync / Refresh button -->
+      <button class="btn-icon" (click)="lampService.fetchStatus()" title="ซิงค์ข้อมูล">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" [class.spin]="lampService.isSyncing()">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Card -->
+  <main class="main-card">
+    <!-- Visual Glowing Lamp & Master Power Switch -->
+    <section class="lamp-stage">
+      <div class="lamp-glow-wrapper" [class.is-off]="!state().power">
+        <!-- Glowing Orb -->
+        <div class="lamp-orb" [ngStyle]="lampGlowStyle()" (click)="togglePower()">
+          <div class="lamp-inner-core">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Power Status Display & Big Switch Button -->
+      <div class="power-control">
+        <div class="power-status-text">
+          <h2>{{ state().power ? 'ไฟเปิดอยู่' : 'ไฟปิดอยู่' }}</h2>
+          <p>{{ state().power ? 'แตะที่โคมไฟหรือสวิตช์เพื่อปิด' : 'แตะที่โคมไฟหรือสวิตช์เพื่อเปิด' }}</p>
+        </div>
+
+        <button class="btn-master-power" [class.power-on]="state().power" (click)="togglePower()">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10" stroke-linecap="round"/>
+          </svg>
+          <span>{{ state().power ? 'ปิดไฟ' : 'เปิดไฟ' }}</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs for Modes -->
+    <nav class="mode-tabs">
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'control'" 
+        (click)="activeTab.set('control'); setMode('manual')">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        <span>ควบคุมเอง</span>
+      </button>
+
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'schedule'" 
+        (click)="activeTab.set('schedule'); setMode('schedule')">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span>ตามเวลา</span>
+      </button>
+
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'ambient'" 
+        (click)="activeTab.set('ambient'); setMode('ambient')">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/>
+        </svg>
+        <span>ตามแสงสว่าง</span>
+      </button>
+
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'settings'" 
+        (click)="activeTab.set('settings')">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>
+        </svg>
+        <span>ตั้งค่าบอร์ด</span>
+      </button>
+    </nav>
+
+    <!-- Tab 1: Manual Controls (ควบคุมเอง) -->
+    @if (activeTab() === 'control') {
+      <section class="tab-pane animate-fade-in">
+        <!-- Brightness Slider -->
+        <div class="control-card">
+          <div class="card-header">
+            <div class="title-with-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+              </svg>
+              <h3>ปรับความสว่าง</h3>
+            </div>
+            <span class="value-badge">{{ state().brightness }}%</span>
+          </div>
+
+          <div class="slider-wrapper">
+            <input 
+              type="range" 
+              min="1" 
+              max="100" 
+              [value]="state().brightness" 
+              (input)="onBrightnessChange($event)" 
+              class="brightness-range"
+            />
+          </div>
+
+          <div class="quick-steps">
+            @for (step of brightnessSteps; track step) {
+              <button 
+                class="btn-step" 
+                [class.active]="state().brightness === step"
+                (click)="setBrightness(step)">
+                {{ step }}%
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Color Palette & Color Temperature -->
+        <div class="control-card">
+          <div class="card-header">
+            <div class="title-with-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/>
+                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2z"/>
+              </svg>
+              <h3>สีและบรรยากาศ</h3>
+            </div>
+            <label class="custom-color-picker" title="เลือกสีตามใจชอบ">
+              <span>เลือกสีเอง</span>
+              <input type="color" [value]="state().color" (input)="onCustomColor($event)">
+            </label>
+          </div>
+
+          <div class="color-grid">
+            @for (c of colorPresets; track c.hex) {
+              <button 
+                class="color-chip" 
+                [class.active]="state().color.toLowerCase() === c.hex.toLowerCase()"
+                [style.background-color]="c.hex"
+                (click)="selectColor(c.hex)"
+                [title]="c.name">
+                <span class="chip-label">{{ c.name }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Tab 2: Schedule Mode (ตามเวลา) -->
+    @if (activeTab() === 'schedule') {
+      <section class="tab-pane animate-fade-in">
+        <div class="control-card">
+          <div class="card-header">
+            <div class="title-with-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <div>
+                <h3>ตั้งเวลาเปิด - ปิดอัตโนมัติ</h3>
+                <p class="subtitle">โคมไฟจะเปิดและดับตามเวลาที่คุณกำหนด</p>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" [checked]="state().schedule.enabled" (change)="toggleSchedule($event)">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="schedule-inputs">
+            <div class="time-box">
+              <label>เวลาเปิดไฟ</label>
+              <input 
+                type="time" 
+                [value]="state().schedule.onTime" 
+                (change)="onScheduleTimeChange('on', $event)" 
+                class="time-picker"
+              />
+            </div>
+            <div class="time-separator">
+              <span>ถึง</span>
+            </div>
+            <div class="time-box">
+              <label>เวลาปิดไฟ</label>
+              <input 
+                type="time" 
+                [value]="state().schedule.offTime" 
+                (change)="onScheduleTimeChange('off', $event)" 
+                class="time-picker"
+              />
+            </div>
+          </div>
+
+          <div class="preset-section">
+            <span class="preset-title">ช่วงเวลาสำเร็จรูป:</span>
+            <div class="preset-buttons">
+              @for (p of schedulePresets; track p.key) {
+                <button 
+                  class="btn-preset" 
+                  [class.active]="state().schedule.preset === p.key"
+                  (click)="applySchedulePreset(p)">
+                  {{ p.label }} ({{ p.on }} - {{ p.off }})
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="info-alert">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            <span>เมื่อเปิดใช้งาน ระบบจะเทียบกับนาฬิกาบนบอร์ดเพื่อควบคุมไฟอัตโนมัติ</span>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Tab 3: Light Sensor Mode (ตามแสงสว่าง) -->
+    @if (activeTab() === 'ambient') {
+      <section class="tab-pane animate-fade-in">
+        <div class="control-card">
+          <div class="card-header">
+            <div class="title-with-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/>
+              </svg>
+              <div>
+                <h3>ตรวจจับความสว่างรอบห้อง</h3>
+                <p class="subtitle">โคมไฟจะเปิดเมื่อห้องมืด และดับอัตโนมัติเมื่อห้องสว่าง</p>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" [checked]="state().ambient.enabled" (change)="toggleAmbient($event)">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <!-- Ambient Light Gauge Bar -->
+          <div class="lux-meter-box">
+            <div class="lux-label-row">
+              <span>มิเตอร์วัดแสง (ระดับแสงปัจจุบัน):</span>
+              <strong class="lux-value">{{ state().ambient.currentLux }}%</strong>
+            </div>
+            <div class="lux-bar-track">
+              <div class="lux-bar-fill" [style.width.%]="state().ambient.currentLux"></div>
+            </div>
+            <div class="lux-condition-row">
+              <span class="tag dark-tag">🌑 สภาพมืด (เปิดไฟ)</span>
+              <span class="tag bright-tag">☀️ สภาพสว่าง (ปิดไฟ)</span>
+            </div>
+          </div>
+
+          <!-- Threshold Options -->
+          <div class="threshold-section">
+            <h4>ระดับความมืดที่ให้เปิดไฟ:</h4>
+            <div class="threshold-grid">
+              @for (th of ambientThresholds; track th.key) {
+                <button 
+                  class="threshold-card" 
+                  [class.active]="state().ambient.threshold === th.key"
+                  (click)="setAmbientThreshold(th.key)">
+                  <div class="th-title">{{ th.name }}</div>
+                  <div class="th-desc">{{ th.desc }}</div>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Tab 4: Board Settings & WiFi (ตั้งค่าบอร์ด) -->
+    @if (activeTab() === 'settings') {
+      <section class="tab-pane animate-fade-in">
+        <!-- Hardware switch simulation -->
+        <div class="control-card">
+          <div class="card-header">
+            <div class="title-with-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="6" y="2" width="12" height="20" rx="2"/><circle cx="12" cy="14" r="4"/>
+              </svg>
+              <div>
+                <h3>สวิตช์ปุ่มกดที่ตัวโคมไฟ</h3>
+                <p class="subtitle">สามารถกดเปิด - ปิดได้ตลอดเวลาเหมือนกดปุ่มจริง</p>
+              </div>
+            </div>
+            <button class="btn-secondary" (click)="pressHardwareButton()">
+              กดปุ่มสวิตช์บอร์ด
+            </button>
+          </div>
+        </div>
+
+        <!-- WiFi Network Setup -->
+        <div class="control-card">
+          <div class="card-header">
+            <div class="title-with-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>
+              </svg>
+              <div>
+                <h3>ตั้งค่าการเชื่อมต่อ WiFi / เครือข่าย</h3>
+                <p class="subtitle">เชื่อมต่อโคมไฟกับเราเตอร์เพื่อควบคุมทางไกล</p>
+              </div>
+            </div>
+            <button class="btn-secondary" (click)="scanWifi()" [disabled]="lampService.isScanningWifi()">
+              {{ lampService.isScanningWifi() ? 'กำลังค้นหา...' : 'สแกนหาเครือข่าย' }}
+            </button>
+          </div>
+
+          <!-- Network list if scanned -->
+          @if (lampService.availableNetworks().length > 0) {
+            <div class="wifi-list">
+              <h4>พบเครือข่ายใกล้เคียง:</h4>
+              <div class="wifi-items">
+                @for (net of lampService.availableNetworks(); track net.ssid) {
+                  <div class="wifi-item" [class.selected]="selectedSsid() === net.ssid" (click)="selectWifi(net.ssid)">
+                    <div class="wifi-info">
+                      <span class="wifi-name">{{ net.ssid }}</span>
+                      <span class="wifi-signal">สัญญาณ {{ net.signal }}%</span>
+                    </div>
+                    <span class="wifi-status">{{ selectedSsid() === net.ssid ? 'เลือกแล้ว' : 'แตะเพื่อเลือก' }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          @if (selectedSsid()) {
+            <div class="wifi-connect-box">
+              <p>เชื่อมต่อกับเครือข่าย: <strong>{{ selectedSsid() }}</strong></p>
+              <div class="input-group">
+                <input 
+                  type="password" 
+                  placeholder="รหัสผ่าน WiFi (ถ้ามี)" 
+                  [(ngModel)]="wifiPassword"
+                  class="text-input"
+                />
+                <button class="btn-primary" (click)="submitWifiConnect()">
+                  บันทึกและเชื่อมต่อ
+                </button>
+              </div>
+            </div>
+          }
+
+          @if (connectionStatusMsg()) {
+            <div class="connection-status-alert">
+              {{ connectionStatusMsg() }}
+            </div>
+          }
+
+          <!-- Device info table -->
+          <div class="device-details">
+            <div class="detail-row">
+              <span>สถานะเชื่อมต่อ:</span>
+              <strong>{{ state().network.status === 'online' ? 'ออนไลน์ (เชื่อมต่อแล้ว)' : 'ออฟไลน์' }}</strong>
+            </div>
+            <div class="detail-row">
+              <span>IP Address บอร์ด:</span>
+              <code>{{ state().network.ipAddress }}</code>
+            </div>
+            <div class="detail-row">
+              <span>เฟิร์มแวร์:</span>
+              <span>All Light ESP32 v2.4 (Golang API)</span>
+            </div>
+          </div>
+
+          <div class="reset-wrapper">
+            <button class="btn-danger" (click)="resetLamp()">
+              ล้างค่าและคืนสู่ค่าเริ่มต้น
+            </button>
+          </div>
+        </div>
+      </section>
+    }
+  </main>
+
+  <footer class="footer">
+    <p>All Light Smart Lamp • ขับเคลื่อนด้วย Angular & Golang</p>
+  </footer>
+</div>

@@ -1,12 +1,12 @@
 {
   "name": "allight-app",
-  "version": "1.0.0",
-  "description": "All Light — ระบบควบคุมโคมไฟอัจฉริยะ",
+  "version": "2.0.0",
+  "description": "All Light — ระบบควบคุมโคมไฟอัจฉริยะ (Angular & Golang)",
   "scripts": {
-    "start": "node server.js",
+    "start": "allight-server.exe",
     "build": "node build.js"
   },
-  "keywords": ["iot", "pwa", "smart-lamp"],
+  "keywords": ["iot", "smart-lamp", "angular", "golang"],
   "author": "",
   "license": "ISC"
 }
