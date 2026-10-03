@@ -1,0 +1,11 @@
+{
+  "name": "allight-app",
+  "version": "1.0.0",
+  "description": "All Light — ระบบควบคุมโคมไฟอัจฉริยะ",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["iot", "pwa", "smart-lamp"],
+  "author": "",
+  "license": "ISC"
+}
